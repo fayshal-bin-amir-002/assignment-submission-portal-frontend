@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "./services/auth";
+
+const roleBasedPrivateRoutes = {
+  student: [/^\/student(\/|$)/],
+  instructor: [/^\/instructor(\/|$)/],
+};
+
+const authRoutes = ["/auth"];
+type Role = keyof typeof roleBasedPrivateRoutes;
+
+export const middleware = async (request: NextRequest) => {
+  const { pathname } = request.nextUrl;
+  const userData = await getCurrentUser();
+  if (!userData) {
+    if (authRoutes.includes(pathname)) {
+      return NextResponse.next();
+    } else {
+      return NextResponse.redirect(
+        new URL(
+          `http://localhost:3000/auth?redirectPath=${pathname}`,
+          request.url
+        )
+      );
+    }
+  }
+
+  if (userData?.role && roleBasedPrivateRoutes[userData?.role as Role]) {
+    const routes = roleBasedPrivateRoutes[userData?.role as Role];
+    if (routes.some((route) => pathname.match(route))) {
+      return NextResponse.next();
+    } else {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+  return NextResponse.redirect(new URL("/", request.url));
+};
+
+export const config = {
+  matcher: [
+    "/auth",
+    "/instructor",
+    "/instructor/:path*",
+    "/student",
+    "/student/:path*",
+  ],
+};
