@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 import { CalendarDaysIcon, FileTextIcon, Plus } from "lucide-react";
 import { getAllAssignments } from "@/services/assignments";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import SubmitModal from "./SubmitModal";
 
 type Assignment = {
   _id: string;
@@ -17,9 +23,11 @@ type Assignment = {
   deadline: string;
 };
 
-const Assignments = () => {
+const Assignments = ({ id }: { id: string }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [assignmentId, setAssignmentId] = useState("");
 
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -41,15 +49,7 @@ const Assignments = () => {
 
   return (
     <div>
-      <div className="w-full flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex-1">📚 Assignments</h1>
-        <Link href="/instructor/assignments/create">
-          <Button>
-            <Plus className="w-4 h-4" />
-            Add Assignment
-          </Button>
-        </Link>
-      </div>
+      <h1 className="text-3xl font-bold text-center mb-6">📚 Assignments</h1>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {loading ? (
@@ -98,10 +98,29 @@ const Assignments = () => {
                   </span>
                 </div>
               </CardContent>
+              <CardFooter>
+                <Button
+                  disabled={new Date() > new Date(assignment.deadline)}
+                  onClick={() => {
+                    setOpen(true);
+                    setAssignmentId(assignment._id);
+                  }}
+                >
+                  Submit Assignment
+                </Button>
+              </CardFooter>
             </Card>
           ))
         )}
       </div>
+      {open && (
+        <SubmitModal
+          open={open}
+          setOpen={setOpen}
+          assignment={assignmentId}
+          student={id}
+        />
+      )}
     </div>
   );
 };

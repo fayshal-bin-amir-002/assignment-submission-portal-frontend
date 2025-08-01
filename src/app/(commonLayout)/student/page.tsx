@@ -1,7 +1,11 @@
-const StudentPage = () => {
+import Assignments from "@/components/modules/dashboard/student/assignments";
+import { getCurrentUser } from "@/services/auth";
+
+const StudentPage = async () => {
+  const { id } = await getCurrentUser();
   return (
     <div>
-      <p>StudentPage</p>
+      <Assignments id={id} />
     </div>
   );
 };

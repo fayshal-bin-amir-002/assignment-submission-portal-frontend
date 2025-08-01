@@ -5,9 +5,10 @@ import { CalendarDaysIcon, LinkIcon, UserIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAllSubmissions } from "@/services/submissions";
+import { getAllSubmissions, getMySubmissions } from "@/services/submissions";
 import { Button } from "@/components/ui/button";
-import FeedBackModal from "./FeedBackModal";
+import { getCurrentUser } from "@/services/auth";
+import Link from "next/link";
 
 export enum SubmissionStatus {
   PENDING = "pending",
@@ -23,11 +24,7 @@ export interface AssignmentSubmission {
     description: string;
     deadline: string;
   };
-  student: {
-    _id: string;
-    email: string;
-    role: string;
-  };
+  student: string;
   submissionUrl: string;
   note: string;
   status: SubmissionStatus;
@@ -35,17 +32,13 @@ export interface AssignmentSubmission {
   feedback: string;
 }
 
-const AllSubmitUsers = ({ id }: { id: string }) => {
+const AllSubmissions = ({ id }: { id: string }) => {
   const [submissions, setSubmissions] = useState<AssignmentSubmission[]>([]);
-  const [submission, setSubmission] = useState<AssignmentSubmission | null>(
-    null
-  );
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
 
   const fetchSubmissions = async () => {
     try {
-      const res = await getAllSubmissions(id);
+      const res = await getMySubmissions(id);
       setSubmissions(res?.data);
     } catch (err) {
       console.error("Error fetching submissions:", err);
@@ -91,9 +84,8 @@ const AllSubmitUsers = ({ id }: { id: string }) => {
       {submissions.map((submission) => (
         <Card key={submission._id} className="border border-muted/30">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <UserIcon className="w-4 h-4 text-primary" />
-              {submission.student.email}
+            <CardTitle>
+              <strong>Assignment:</strong> {submission.assignment.title}
             </CardTitle>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <CalendarDaysIcon className="w-4 h-4" />
@@ -108,59 +100,44 @@ const AllSubmitUsers = ({ id }: { id: string }) => {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <p>
-              <strong>Assignment:</strong> {submission.assignment.title}
-            </p>
-            <p>
               <strong>Note:</strong> {submission.note}
             </p>
             <p className="flex items-center gap-2">
               <LinkIcon className="w-4 h-4 text-blue-500" />
-              <a
+              <Link
                 href={submission.submissionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline break-all"
               >
                 View Submission
-              </a>
+              </Link>
             </p>
-            <div className="flex justify-between items-center pt-4">
-              <p>
-                <strong>Status:</strong>{" "}
-                <Badge
-                  variant={
-                    submission.status === SubmissionStatus.REVIEWED
-                      ? "default"
-                      : submission.status === SubmissionStatus.REJECTED
-                      ? "destructive"
-                      : "secondary"
-                  }
-                >
-                  {submission.status.toLocaleUpperCase()}
-                </Badge>
-              </p>
-              <Button
-                onClick={() => {
-                  setOpen(true);
-                  setSubmission(submission);
-                }}
+            <p>
+              <strong>Status:</strong>{" "}
+              <Badge
+                variant={
+                  submission.status === SubmissionStatus.REVIEWED
+                    ? "default"
+                    : submission.status === SubmissionStatus.REJECTED
+                    ? "destructive"
+                    : "secondary"
+                }
               >
-                Give Feedback
-              </Button>
-            </div>
+                {submission.status.toLocaleUpperCase()}
+              </Badge>
+            </p>
+            {submission?.feedback && (
+              <p>
+                <strong>Feedback: </strong>
+                {submission.feedback}
+              </p>
+            )}
           </CardContent>
         </Card>
       ))}
-      {open && (
-        <FeedBackModal
-          open={open}
-          setOpen={setOpen}
-          submission={submission}
-          fetchSubmissions={fetchSubmissions}
-        />
-      )}
     </div>
   );
 };
 
-export default AllSubmitUsers;
+export default AllSubmissions;
