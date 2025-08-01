@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useRouter, useSearchParams } from "next/navigation";
 import ButtonLoader from "@/components/shared/Loader/ButtonLoader";
-import { registerUser } from "@/services/auth";
+import { getCurrentUser, registerUser } from "@/services/auth";
 
 const formSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address." }),
@@ -59,10 +59,11 @@ const RegisterForm = () => {
       if (res?.success) {
         form.reset();
         toast.success(res?.message);
+        const { role } = await getCurrentUser();
         if (redirect) {
           router.push(redirect);
         } else {
-          router.push("/");
+          router.push(role);
         }
       } else {
         toast.error(res?.message);
