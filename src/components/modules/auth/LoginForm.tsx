@@ -52,8 +52,10 @@ const LoginForm = () => {
         const { role } = await getCurrentUser();
         if (redirect) {
           router.push(redirect);
+        } else if (role) {
+          router.push(`/${role}`);
         } else {
-          router.push(role);
+          router.push(`/`);
         }
       } else {
         toast.error(res?.message);
