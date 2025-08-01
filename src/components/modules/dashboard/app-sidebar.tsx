@@ -37,6 +37,10 @@ const data = {
       title: "Assignments",
       url: "/instructor/assignments",
     },
+    {
+      title: "Submissions",
+      url: "/instructor/submissions",
+    },
   ],
 };
 
