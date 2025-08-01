@@ -1,3 +1,5 @@
+"use server";
+
 import { cookies } from "next/headers";
 import { FieldValues } from "react-hook-form";
 import { jwtDecode } from "jwt-decode";
@@ -38,7 +40,6 @@ export const loginUser = async (data: FieldValues) => {
 
     if (result?.success) {
       (await cookies()).set("accessToken", result?.data?.accessToken);
-      (await cookies()).set("refreshToken", result?.data?.refreshToken);
     }
 
     return result;
