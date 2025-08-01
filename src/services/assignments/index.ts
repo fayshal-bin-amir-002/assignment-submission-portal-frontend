@@ -6,7 +6,7 @@ import { FieldValues } from "react-hook-form";
 
 export const getAllAssignments = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/assignment`, {
+    const res = await fetch(`${process.env.BASE_API}/assignment`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export const getAllAssignments = async () => {
 
 export const createAssignment = async (payload: FieldValues) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/assignment`, {
+    const res = await fetch(`${process.env.BASE_API}/assignment`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
